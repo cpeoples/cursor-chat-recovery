@@ -215,6 +215,14 @@ check_cursor_running() {
         echo -e "${RED}WARNING: Cursor is currently running!${NC}"
         echo "It's recommended to close Cursor before modifying chat history."
         echo ""
+
+        if [ "$DRY_RUN" = true ]; then
+            echo -e "${CYAN}[DRY RUN] Would require Cursor to be closed before making changes.${NC}"
+            echo -e "${CYAN}[DRY RUN] Cursor was not terminated.${NC}"
+            echo ""
+            return
+        fi
+
         read -p "Do you want to kill Cursor processes? (y/n) " -n 1 -r
         echo ""
         if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -358,6 +366,13 @@ merge_chat_histories() {
     local target_db=$2
     
     echo -e "${YELLOW}Merging chat histories...${NC}"
+
+    if [ "$DRY_RUN" = true ]; then
+        echo -e "${CYAN}[DRY RUN] Would backup: $target_db${NC}"
+        echo -e "${CYAN}[DRY RUN] Would merge: $source_db -> $target_db${NC}"
+        echo ""
+        return
+    fi
     
     if ! command -v sqlite3 &> /dev/null; then
         echo -e "${RED}sqlite3 not found. Cannot merge databases.${NC}"

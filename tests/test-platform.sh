@@ -102,6 +102,29 @@ if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "
     echo ""
 fi
 
+# Test 9: Dry-run guards precede all mutation paths
+echo "Test 9: Dry-run Mutation Guards"
+cursor_check_body=$(sed -n '/^check_cursor_running()/,/^}/p' "$MAIN_SCRIPT")
+merge_body=$(sed -n '/^merge_chat_histories()/,/^}/p' "$MAIN_SCRIPT")
+
+cursor_guard_line=$(printf '%s\n' "$cursor_check_body" | grep -n 'if \[ "$DRY_RUN" = true \]' | head -1 | cut -d: -f1)
+kill_line=$(printf '%s\n' "$cursor_check_body" | grep -n 'killall\|taskkill' | head -1 | cut -d: -f1)
+merge_guard_line=$(printf '%s\n' "$merge_body" | grep -n 'if \[ "$DRY_RUN" = true \]' | head -1 | cut -d: -f1)
+backup_line=$(printf '%s\n' "$merge_body" | grep -n 'backup_database' | head -1 | cut -d: -f1)
+
+if [ -n "$cursor_guard_line" ] && [ -n "$kill_line" ] && [ "$cursor_guard_line" -lt "$kill_line" ]; then
+    pass "Dry-run exits before Cursor termination"
+else
+    fail "Dry-run guard must precede Cursor termination"
+fi
+
+if [ -n "$merge_guard_line" ] && [ -n "$backup_line" ] && [ "$merge_guard_line" -lt "$backup_line" ]; then
+    pass "Dry-run exits before merge backup/write"
+else
+    fail "Dry-run guard must precede merge mutations"
+fi
+echo ""
+
 # Summary
 echo "========================================="
 echo "Summary"

@@ -118,7 +118,7 @@ PowerShell/CMD not supported.
 
 - ✅ Automatic timestamped backups before any changes
 - ✅ Warns if Cursor is running
-- ✅ Dry-run mode to preview changes
+- ✅ Dry-run mode previews copy/merge operations without terminating Cursor or changing files
 - ✅ Validates source/target selections
 
 Backups are saved as `state.vscdb.backup.YYYYMMDD_HHMMSS` in the workspace directory.
